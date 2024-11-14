@@ -5,7 +5,7 @@ const AddTodoForm = () => {
             <h2>Add Todo</h2>
             <form>
                 <label htmlFor="todoTitle">Title</label>
-                <input type="text" id="todoTitle" name="todoTitle"/>
+                <input type="text" id="todoTitle" name="todoTitle" required/>
                 <button type="submit">Add</button>
             </form>
         </div>
