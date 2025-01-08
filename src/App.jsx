@@ -23,6 +23,11 @@ function App() {
     setTodoList((prevTodoList) => [...prevTodoList, newTodo])
   };
 
+  const removeTodo = (id) => {
+    const updatedTodoList = todoList.filter(todo => todo.id !== id);
+    setTodoList(updatedTodoList);
+  };
+
   const handleTitleChange = (event) => {
     setTodoTitle(event.target.value);
   };
@@ -30,10 +35,15 @@ function App() {
   return (
     <>
       <h1>Todo List</h1>
-      <AddTodoForm onAddTodo={addTodo} 
-      todoTitle={todoTitle}
-      handleTitleChange={handleTitleChange}/>
-      <TodoList todoList={todoList}/>
+      <AddTodoForm 
+          onAddTodo={addTodo}
+          todoTitle={todoTitle}
+          handleTitleChange={handleTitleChange}
+      />
+      <TodoList 
+          todoList={todoList}
+          onRemoveTodo={removeTodo}
+      />
     </>
   );
 };
