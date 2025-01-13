@@ -3,11 +3,7 @@ import TodoList from './TodoList';
 import AddTodoForm from './AddTodoForm';
 
 function App() {
-  const [todoList, setTodoList] = useState(() => {
-    const savedList = localStorage.getItem("savedTodoList");
-    return savedList ? JSON.parse(savedList) : [];
-  });
-
+  const [todoList, setTodoList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [todoTitle, setTodoTitle] = useState('');
 
@@ -16,20 +12,19 @@ function App() {
       setTimeout(() => {
         resolve({
           data: {
-            todoList: []
+            todoList: JSON.parse(localStorage.getItem("savedTodoList")) || []
           }
         });
       }, 2000);
     });
 
     fetchTodoList.then((result) => {
-      setTodoList((prevTodoList) => prevTodoList.length ? prevTodoList : result.data.todoList);
+      setTodoList(result.data.todoList);
       setIsLoading(false);
     }).catch((error) => {
       console.error(error);
       setIsLoading(false);
     });
-
   }, []);
 
   useEffect(() => {
@@ -47,7 +42,7 @@ function App() {
     const updatedTodoList = todoList.filter(todo => todo.id !== id);
     setTodoList(updatedTodoList);
   };
-
+  
   const handleTitleChange = (event) => {
     setTodoTitle(event.target.value);
   };
