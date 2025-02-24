@@ -12,7 +12,7 @@ const TodoListItem = ({ todo, onRemoveTodo }) => {
     );
 };
 
-TodoListItem.prototype = {
+TodoListItem.propTypes = {
     todo: PropTypes.shape({
         id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
         title: PropTypes.string.isRequired

@@ -5,7 +5,9 @@ const InputWithLabel = ({ todoTitle, handleTitleChange, id, children }) => {
     const inputRef = useRef(null);
 
     useEffect(() => {
-        inputRef.current.focus();
+        if (inputRef.current) {
+        inputRef.current.focus()
+        }
     }, []);
     
     return (
@@ -24,7 +26,7 @@ const InputWithLabel = ({ todoTitle, handleTitleChange, id, children }) => {
     )
 };
 
-InputWithLabel.prototype = {
+InputWithLabel.propTypes = {
     todoTitle: PropTypes.string.isRequired,
     handleTitleChange: PropTypes.func.isRequired,
     id: PropTypes.string.isRequired,

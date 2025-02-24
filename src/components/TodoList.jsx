@@ -17,7 +17,7 @@ const TodoList = ({ todoList, onRemoveTodo }) => {
     );
 };
 
-TodoList.prototype = {
+TodoList.propTypes = {
     todoList: PropTypes.arrayOf(PropTypes.shape({
         id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
         title: PropTypes.string.isRequired

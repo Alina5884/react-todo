@@ -9,19 +9,23 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [todoTitle, setTodoTitle] = useState('');
   const [sortOrder, setSortOrder] = useState('asc');
+  const [error, setError] = useState(null);
+
+  const API_URL = `https://api.airtable.com/v0/${import.meta.env.VITE_AIRTABLE_BASE_ID}/${import.meta.env.VITE_TABLE_NAME}`;
+  const headers = {
+    Authorization: `Bearer ${import.meta.env.VITE_AIRTABLE_API_TOKEN}`,
+    'Content-Type': 'application/json'
+  };
 
   const fetchData = async () => {
-    const options = {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${import.meta.env.VITE_AIRTABLE_API_TOKEN}`
-      }
-    };
-
-    const url = `https://api.airtable.com/v0/${import.meta.env.VITE_AIRTABLE_BASE_ID}/${import.meta.env.VITE_TABLE_NAME}?view=Grid%20view&sort[0][field]=title&sort[0][direction]=${sortOrder}`
+    setIsLoading(true);
+    setError(null);
 
     try {
-      const response = await fetch(url, options);
+      const response = await fetch(`${API_URL}?view=Grid%20view&sort[0][field]=title&sort[0][direction]=${sortOrder}`, {
+        method: 'GET',
+        headers
+      });
 
       if (!response.ok) {
         throw new Error(`Error: ${response.status}`);
@@ -53,19 +57,12 @@ function App() {
           createdTime: todo.fields.createdTime || new Date().toISOString()
       }));
 
-      todos.sort((a, b) => {
-        if (sortOrder === 'asc') {
-          return a.title.toLowerCase() < b.title.toLowerCase() ? -1 : a.title.toLowerCase() > b.title.toLowerCase() ? 1 : 0
-        } else {
-          return a.title.toLowerCase() < b.title.toLowerCase() ? 1 : a.title.toLowerCase() > b.title.toLowerCase() ? -1 : 0
-        }
-      });
-
-    setTodoList(todos);
-    setIsLoading(false);
+      setTodoList(todos);
 
     } catch (error) {
-      console.log(`Error fetching data: ${error.message}`);
+      setError(error.message)
+    } finally {
+      setIsLoading(false)
     }
   };
 
@@ -74,29 +71,65 @@ function App() {
   }, [sortOrder]);
 
   useEffect(() => {
-    if (!isLoading) {
-    localStorage.setItem("savedTodoList", JSON.stringify(todoList));
-    }
-  }, [todoList, isLoading]);
+}, [todoList]);
 
 
-  const addTodo = (newTodo) => {
-    setTodoList((prevTodoList) => {
-      const updatedList = [...prevTodoList, newTodo];
-      updatedList.sort((a, b) => {
-        if (sortOrder === 'asc') {
-          return a.title.toLowerCase() < b.title.toLowerCase() ? -1 : a.title.toLowerCase() > b.title.toLowerCase() ? 1 : 0
-        } else {
-          return a.title.toLowerCase() < b.title.toLowerCase() ? 1 : a.title.toLowerCase() > b.title.toLowerCase() ? -1 : 0
-        }
+  const addTodo = async () => {
+    if (!todoTitle.trim()) return;
+
+    const newTodo = {
+      fields: {
+        title: todoTitle
+      }
+    };
+
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(newTodo)
       });
-      return updatedList
-      })
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}`)
+      }
+
+      const data = await response.json();
+
+      if (data) {
+        setTodoList((prevTodoList) => [
+          ...prevTodoList,
+          {
+            title: data.fields.title,
+            id: data.id,
+            createdTime: data.createdTime || new Date().toISOString()
+          }
+        ]);
+      }
+
+      setTodoTitle('');
+
+    } catch(error) {
+      setError(error.message);
+    }
   };
 
-  const removeTodo = (id) => {
-    const updatedTodoList = todoList.filter(todo => todo.id !== id);
-    setTodoList(updatedTodoList)
+  const removeTodo = async (id) => {
+    try {
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: 'DELETE',
+        headers
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`)
+      };
+
+      setTodoList((prevTodoList) => prevTodoList.filter(todo => todo.id !== id));
+
+    } catch (error) {
+        setError(error.message)
+    }
   };
   
   const handleTitleChange = (event) => {
