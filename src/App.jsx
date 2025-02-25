@@ -33,24 +33,6 @@ function App() {
       
       const data = await response.json();
 
-      // data.records.sort((objectA, objectB) => {
-      //   const titleA = objectA.fields.title.toLowerCase();
-      //   const titleB = objectB.fields.title.toLowerCase();
-
-      //   if (titleA < titleB) return -1;
-      //   if (titleA > titleB) return 1;
-      //   return 0
-      // });
-
-      // data.records.sort((objectA, objectB) => {
-      //   const titleA = objectA.fields.title.toLowerCase();
-      //   const titleB = objectB.fields.title.toLowerCase();
-
-      //   if (titleA < titleB) return 1;
-      //   if (titleA > titleB) return -1;
-      //   return 0
-      // });
-
       const todos = data.records.map((todo) => ({
           title: todo.fields.title,
           id: todo.id,
@@ -77,6 +59,9 @@ function App() {
   const addTodo = async () => {
     if (!todoTitle.trim()) return;
 
+    setIsLoading(true);
+    setError(null);
+
     const newTodo = {
       fields: {
         title: todoTitle
@@ -94,23 +79,13 @@ function App() {
         throw new Error(`Error ${response.status}`)
       }
 
-      const data = await response.json();
-
-      if (data) {
-        setTodoList((prevTodoList) => [
-          ...prevTodoList,
-          {
-            title: data.fields.title,
-            id: data.id,
-            createdTime: data.createdTime || new Date().toISOString()
-          }
-        ]);
-      }
-
+      await fetchData();
       setTodoTitle('');
 
     } catch(error) {
-      setError(error.message);
+      setError(error.message)
+    } finally {
+      setIsLoading(false)
     }
   };
 
@@ -157,6 +132,7 @@ function App() {
                     onAddTodo={addTodo}
                     todoTitle={todoTitle}
                     handleTitleChange={handleTitleChange}
+                    isLoading={isLoading}
                 />
                 <TodoList 
                     todoList={todoList}

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import InputWithLabel from './InputWithLabel';
 import PropTypes from 'prop-types';
 
-function AddTodoForm({ onAddTodo, todoTitle, handleTitleChange }) {
+function AddTodoForm({ onAddTodo, todoTitle, handleTitleChange, isLoading }) {
     const handleAddTodo = async (event) =>  {
         event.preventDefault();
 
@@ -24,14 +24,19 @@ function AddTodoForm({ onAddTodo, todoTitle, handleTitleChange }) {
                 >
                     Title
                 </InputWithLabel>
-                <button type="submit">Add</button>
+                <button type="submit" disabled={isLoading}>
+                    {isLoading ? 'Addidg...' : 'Add'}
+                </button>
             </form>
         </div>
     );
 };
 
 AddTodoForm.propTypes = {
-    onAddTodo: PropTypes.func.isRequired
+    onAddTodo: PropTypes.func.isRequired,
+    todoTitle: PropTypes.string.isRequired,
+    handleTitleChange: PropTypes.func.isRequired,
+    isLoading: PropTypes.bool.isRequired
 };
 
 export default AddTodoForm;
